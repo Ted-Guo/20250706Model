@@ -1,1 +1,5 @@
+題目來源:
 https://www.kaggle.com/competitions/llm-classification-finetuning/discussion?sort=votes
+
+完整csv url:
+https://www.kaggle.com/competitions/llm-classification-finetuning/data
