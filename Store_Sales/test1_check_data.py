@@ -2,11 +2,38 @@
 """
 Created on Thu Jul 17 10:09:05 2025
 
+
+[0]	train-rmse:1039.13872	val-rmse:1033.90243
+[50]	train-rmse:454.08052	val-rmse:445.56665
+[100]	train-rmse:397.33665	val-rmse:390.00644
+[150]	train-rmse:365.65453	val-rmse:361.03657
+[200]	train-rmse:346.19775	val-rmse:343.96983
+[250]	train-rmse:331.93956	val-rmse:330.87886
+[300]	train-rmse:320.49660	val-rmse:321.99337
+[350]	train-rmse:311.90367	val-rmse:315.07574
+[400]	train-rmse:304.23584	val-rmse:308.57494
+[450]	train-rmse:298.68688	val-rmse:304.90207
+[500]	train-rmse:294.08753	val-rmse:301.55897
+[550]	train-rmse:288.29678	val-rmse:296.63834
+[600]	train-rmse:282.94562	val-rmse:292.68795
+[650]	train-rmse:277.71242	val-rmse:289.05873
+[700]	train-rmse:274.56889	val-rmse:286.63987
+[750]	train-rmse:271.62176	val-rmse:284.40140
+[800]	train-rmse:268.62956	val-rmse:282.12307
+[850]	train-rmse:264.77236	val-rmse:280.01789
+[900]	train-rmse:260.87814	val-rmse:277.03058
+[950]	train-rmse:258.34561	val-rmse:275.23949
+[999]	train-rmse:256.10606	val-rmse:273.81900
+
+
 @author: user
 """
 
 import pandas as pd;
 import numpy as np;
+import xgboost as xgb;
+
+from sklearn.model_selection import train_test_split;
 
 
 # =============================================================================
@@ -164,4 +191,91 @@ def add_hot_day_feature(df, weekday, threshold):
 
 df_train = add_hot_day_feature(df_train,4,1.3);
 
-df = df_train[df_train["day4_hot"] == 1];
+def preprocess_for_xgb(df, category_cols=None):
+    """
+    將指定的欄位轉成 pandas 的 category 型別，方便給 XGBoost 使用。
+    
+    Parameters:
+        df (pd.DataFrame): 要處理的資料集
+        category_cols (list, optional): 欲轉換的類別欄位名稱清單
+                                        預設會使用推薦欄位集。
+    
+    Returns:
+        pd.DataFrame: 轉換後的資料集
+    """
+    if category_cols is None:
+        category_cols = [
+            'store_nbr', 'family', 'state', 'city', 'type',
+            'cluster', 'holiday_type'
+        ]
+        
+    for col in category_cols:
+        if col in df.columns:
+            df[col] = df[col].astype("category");
+    
+    return df
+
+df_train = preprocess_for_xgb(df_train);
+
+
+
+
+
+
+# 資料清理函數
+def clean_for_xgb(df):
+    df = df.copy();
+    
+    # 移除無法轉為數值的欄位
+    drop_cols = ['date', 'description', 'store_type', 'locale'];
+    df = df.drop(columns=[col for col in drop_cols if col in df.columns]);
+
+    # 類別欄位轉為數值
+    for col in df.select_dtypes(include='category').columns:
+        df[col] = df[col].cat.codes;
+    for col in df.select_dtypes(include='object').columns:
+        df[col] = df[col].astype("category").cat.codes;
+
+    return df;
+
+# 特徵與目標變數拆分
+X = df_train.drop(columns=["sales"]);
+y = df_train["sales"];
+
+# 切分資料集（隨機抽樣，涵蓋全年節慶）
+X_train, X_val, y_train, y_val = train_test_split(
+    X, y, test_size=0.2, random_state=42
+)
+
+# 清理訓練與驗證資料
+X_train_clean = clean_for_xgb(X_train);
+X_val_clean = clean_for_xgb(X_val);
+
+# 建立 DMatrix
+dtrain = xgb.DMatrix(X_train_clean, label=y_train);
+dval = xgb.DMatrix(X_val_clean, label=y_val);
+
+# 模型參數
+params = {
+    "objective": "reg:squarederror",
+    "eval_metric": "rmse",
+    "learning_rate": 0.1,
+    "max_depth": 6,
+    "seed": 42
+}
+
+# 訓練模型
+evals = [(dtrain, "train"), (dval, "val")]
+model = xgb.train(
+    params,
+    dtrain,
+    num_boost_round=1000,
+    evals=evals,
+    early_stopping_rounds=50,
+    verbose_eval=50
+)
+
+# 預測
+dtest = xgb.DMatrix(X_val_clean);
+y_pred = model.predict(dtest);
+
