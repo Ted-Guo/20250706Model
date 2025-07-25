@@ -8,21 +8,106 @@ import pandas as pd;
 import numpy as np;
 import matplotlib.pyplot as plt;
 
-df_train = pd.read_csv("train.csv", parse_dates=['date']);
+from data_preprocessor import data_functions;
 
-df_train.groupby("date")["sales"].sum().plot(figsize=(12, 4), title="Total Sales Over Time");
+
+common_functions = data_functions();
+df_train = common_functions.get_df_after_handled();
+
+#雖然整年間有上上下下，但是每年都有往上攀升趨勢 -> sales 存在趨勢性(Trend)與季節性(Seasonality)
+#df_train.groupby("date")["sales"].sum().plot();
 
 
 # =============================================================================
-#time series for month  
+# #周末銷售特別高
+# group = df_train.groupby("dayofweek")["sales"].mean();
+# group.plot(kind = "bar",title = "Average Sales by Day of Week");
+# plt.xlabel("Day of Week");
+# plt.ylabel("Average Sales");
+# plt.show();
+# 
+# #12月銷售特別高
+# group_mon = df_train.groupby("month")["sales"].mean();
+# group_mon.plot(kind = "bar",title = "Average Sales by Day of Week");
+# plt.xlabel("Month");
+# plt.ylabel("Average Sales");
+# plt.show();
 # =============================================================================
-df_train["month"] = df_train["date"].dt.month;
 
-df_train["year"] = df_train["date"].dt.year
+# =============================================================================
+# #觀察是否周末銷售高是否有週期性
+# group = df_train[df_train["year"] == 2013 ].groupby(["dayofweek"])["sales"].mean();
+# group.plot(kind = "bar",title = "2013 year everage Sales by Day of Week");
+# plt.xlabel("Day of Week");
+# plt.ylabel("Average Sales");
+# plt.show();
+# 
+# group = df_train[df_train["year"] == 2014 ].groupby(["dayofweek"])["sales"].mean();
+# group.plot(kind = "bar",title = "2014 year everage Sales by Day of Week");
+# plt.xlabel("Day of Week");
+# plt.ylabel("Average Sales");
+# plt.show();
+# 
+# group = df_train[df_train["year"] == 2015 ].groupby(["dayofweek"])["sales"].mean();
+# group.plot(kind = "bar",title = "2015 year everage Sales by Day of Week");
+# plt.xlabel("Day of Week");
+# plt.ylabel("Average Sales");
+# plt.show();
+# 
+# group = df_train[df_train["year"] == 2016 ].groupby(["dayofweek"])["sales"].mean();
+# group.plot(kind = "bar",title = "2016 year everage Sales by Day of Week");
+# plt.xlabel("Day of Week");
+# plt.ylabel("Average Sales");
+# plt.show();
+# 
+# 
+# group = df_train[df_train["year"] == 2017 ].groupby(["dayofweek"])["sales"].mean();
+# group.plot(kind = "bar",title = "2017 year everage Sales by Day of Week");
+# plt.xlabel("Day of Week");
+# plt.ylabel("Average Sales");
+# plt.show();
+# =============================================================================
 
-monthly_sales = df_train.groupby(["year", "month"])["sales"].mean().unstack("year")
 
-monthly_sales.plot(figsize=(12, 5), title="Monthly Average Sales per Year")
-plt.ylabel("Average Sales")
-plt.grid(True)
-plt.show()
+# =============================================================================
+# #week轉換成折線圖
+# plt.figure(figsize=(10, 6));
+# 
+# # 針對每一年，畫出每個 dayofweek 的平均 sales 折線圖
+# for year in range(2013, 2018):
+#     group = df_train[df_train["year"] == year].groupby("dayofweek")["sales"].mean();
+#     plt.plot(group.index, group.values, marker="o", label=str(year));
+# 
+# # 加上標籤與標題
+# plt.title("Average Sales by Day of Week (2013-2017)");
+# plt.xlabel("Day of Week (0=Sunday, 6=Saturday)");
+# plt.ylabel("Average Sales");
+# plt.legend(title="Year");
+# plt.grid(True);
+# plt.xticks(ticks=[0,1,2,3,4,5,6], labels=["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]);
+# plt.tight_layout();
+# plt.show();
+# =============================================================================
+
+
+
+#month轉換成折線圖
+plt.figure(figsize=(10, 6));
+
+# 針對每一年，畫出每個 dayofweek 的平均 sales 折線圖
+for year in range(2013, 2018):
+    group = df_train[df_train["year"] == year].groupby("month")["sales"].mean();
+    plt.plot(group.index, group.values, marker="o", label=str(year));
+
+# 加上標籤與標題
+mon_ticks = [1,2,3,4,5,6,7,8,9,10,11,12];
+mon_labels = ["Jan", "Feb", "Mar", "Apr", "May", "Jun",
+          "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+plt.title("Average Sales by month (2013-2017)");
+plt.xlabel("month");
+plt.ylabel("Average Sales");
+plt.legend(title = "Year");
+plt.grid(True);
+plt.xticks(ticks = mon_ticks, labels = mon_labels);
+plt.tight_layout();
+plt.show();
