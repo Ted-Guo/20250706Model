@@ -9,9 +9,12 @@ import numpy as np;
 import matplotlib.pyplot as plt;
 
 from data_preprocessor import data_functions;
+from check_time_series import time_series_function;
+
 
 
 common_functions = data_functions();
+time_functions = time_series_function();
 df_train = common_functions.get_df_after_handled();
 
 #雖然整年間有上上下下，但是每年都有往上攀升趨勢 -> sales 存在趨勢性(Trend)與季節性(Seasonality)
@@ -91,23 +94,43 @@ df_train = common_functions.get_df_after_handled();
 
 
 
-#month轉換成折線圖
-plt.figure(figsize=(10, 6));
+# =============================================================================
+# #month轉換成折線圖
+# plt.figure(figsize=(10, 6));
+# 
+# # 針對每一年，畫出每個 dayofweek 的平均 sales 折線圖
+# for year in range(2013, 2018):
+#     group = df_train[df_train["year"] == year].groupby("month")["sales"].mean();
+#     plt.plot(group.index, group.values, marker="o", label=str(year));
+# 
+# # 加上標籤與標題
+# mon_ticks = [1,2,3,4,5,6,7,8,9,10,11,12];
+# mon_labels = ["Jan", "Feb", "Mar", "Apr", "May", "Jun",
+#           "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+# plt.title("Average Sales by month (2013-2017)");
+# plt.xlabel("month");
+# plt.ylabel("Average Sales");
+# plt.legend(title = "Year");
+# plt.grid(True);
+# plt.xticks(ticks = mon_ticks, labels = mon_labels);
+# plt.tight_layout();
+# plt.show();
+# 
+# =============================================================================
 
-# 針對每一年，畫出每個 dayofweek 的平均 sales 折線圖
-for year in range(2013, 2018):
-    group = df_train[df_train["year"] == year].groupby("month")["sales"].mean();
-    plt.plot(group.index, group.values, marker="o", label=str(year));
 
-# 加上標籤與標題
-mon_ticks = [1,2,3,4,5,6,7,8,9,10,11,12];
-mon_labels = ["Jan", "Feb", "Mar", "Apr", "May", "Jun",
-          "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-plt.title("Average Sales by month (2013-2017)");
-plt.xlabel("month");
-plt.ylabel("Average Sales");
-plt.legend(title = "Year");
-plt.grid(True);
-plt.xticks(ticks = mon_ticks, labels = mon_labels);
-plt.tight_layout();
-plt.show();
+#確認預估目標是否平穩來決定模型類型
+df_sales = df_train.sort_values("date")
+cluster_labels = time_functions.cluster_sales(df_sales, n_clusters=5)
+df_selected = time_functions.select_top_30_percent(df_sales, cluster_labels)
+overall_series = time_functions.concat_sales(df_selected)
+time_functions.run_adf(overall_series);
+
+
+
+
+
+
+
+
+
