@@ -218,10 +218,31 @@ class data_functions:
             df[col] = le.fit_transform(df[col].astype(str))
         return df
         
+    
+    #簡單的利用關鍵字將節日分為 國慶 地方跟宗教
+    def create_multi_label_holiday_features(self,df):
+        # 建立三個二元欄位，預設為0
+        df["is_national_holiday"] = 0;
+        df["is_religious_holiday"] = 0;
+        df["is_local_holiday"] = 0;
+    
+        # 標註國定假日：holiday_type 或 locale 是 National
+        df.loc[(df["holiday_type"] == "National") | (df["locale"] == "National"), "is_national_holiday"] = 1;
+    
+        # 標註地方假日：holiday_type 或 locale 是 Regional 或 Local
+        df.loc[(df["holiday_type"].isin(["Regional", "Local"])) | (df["locale"].isin(["Regional", "Local"])), "is_local_holiday"] = 1;
+    
+        # 標註宗教假日：可以用 description 關鍵字判斷（你可以根據資料自己補充）
+        religious_keywords = ["Viernes Santo", "Semana Santa", "Carnaval", "Navidad", "Easter", "Christmas"];  # 範例關鍵字
+        df.loc[df["description"].str.contains('|'.join(religious_keywords), case=False, na=False), "is_religious_holiday"] = 1;
+    
+        return df;
         
         
-        
-        
+    #利用sentence transformer來將節日分類
+# =============================================================================
+#     def labeling_holiday_by_sen_trans(self,df):
+# =============================================================================
         
         
         

@@ -10,11 +10,13 @@ import matplotlib.pyplot as plt;
 
 from data_preprocessor import data_functions;
 from check_time_series import time_series_function;
+from soft_clustering import trans_locale_function;
 
 
 
 common_functions = data_functions();
 time_functions = time_series_function();
+locale_function =  trans_locale_function();
 df_train = common_functions.get_df_after_handled();
 
 #雖然整年間有上上下下，但是每年都有往上攀升趨勢 -> sales 存在趨勢性(Trend)與季節性(Seasonality)
@@ -120,17 +122,43 @@ df_train = common_functions.get_df_after_handled();
 
 
 #確認預估目標是否平穩來決定模型類型
-df_sales = df_train.sort_values("date")
-cluster_labels = time_functions.cluster_sales(df_sales, n_clusters=5)
-df_selected = time_functions.select_top_30_percent(df_sales, cluster_labels)
-overall_series = time_functions.concat_sales(df_selected)
-time_functions.run_adf(overall_series);
+# =============================================================================
+# df_sales = df_train.sort_values("date")
+# cluster_labels = time_functions.cluster_sales(df_sales, n_clusters=5)
+# df_selected = time_functions.select_top_30_percent(df_sales, cluster_labels)
+# overall_series = time_functions.concat_sales(df_selected)
+# time_functions.run_adf(overall_series);
+# 
+# =============================================================================
 
 
 
+# =============================================================================
+# print(list(df_train.columns));
+# print(df_train.iloc[0]);
+# =============================================================================
 
 
 
+# =============================================================================
+# desc_counts = df_train['description'].value_counts()
+# print(desc_counts)
+# print(f"總共有 {len(desc_counts)} 種不同的節日描述")
+# =============================================================================
 
 
+df_train = common_functions.create_multi_label_holiday_features(df_train);
+#print(df_train.iloc[0]);
+# =============================================================================
+# df_train = common_functions.add_lag_rolling_features(
+#     df=df_train,
+#     group_keys=['store_nbr', 'family'],
+#     target_cols=['sales', 'transactions'],
+#     lags=[1, 7, 14],
+#     rolling_windows=[7, 14]
+# );
+# =============================================================================
 
+
+df_train = locale_function.description_sentence_trans(df_train);
+df_train = locale_function.hdbscan_clusting(df_train);
