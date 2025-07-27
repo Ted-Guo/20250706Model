@@ -7,6 +7,9 @@ Created on Thu Jul 24 14:10:50 2025
 import pandas as pd;
 import numpy as np;
 import matplotlib.pyplot as plt;
+import gzip
+import pickle
+
 
 from data_preprocessor import data_functions;
 from check_time_series import time_series_function;
@@ -160,5 +163,8 @@ df_train = common_functions.create_multi_label_holiday_features(df_train);
 # =============================================================================
 
 
-df_train = locale_function.description_sentence_trans(df_train);
-df_train = locale_function.hdbscan_clusting(df_train);
+
+#save data
+locale_function.description_sentence_trans(df_train);
+
+df = df_train.iloc[0];
