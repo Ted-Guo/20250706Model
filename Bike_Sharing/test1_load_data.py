@@ -27,30 +27,32 @@ dd = df.head();
 
 
 
-# ===== EDA  檢查是否偏態=====
-#print(df[['temp','humidity','windspeed','count']].describe());
-
-
-plt.figure(figsize=(12,5))
-plt.rcParams['font.sans-serif'] = ['Microsoft JhengHei'];
-plt.rcParams['axes.unicode_minus'] = False;
-
-
-# 直方圖
-plt.subplot(1,2,1);
-sns.histplot(df['count'], bins=60, kde=True);  # kde=True 會畫密度線
-plt.xlabel('count');
-plt.ylabel('資料筆數');
-plt.title('Histogram and KDE of count');
-
-# 箱型圖 
-plt.subplot(1,2,2);
-sns.boxplot(y=df['count']);
-plt.ylabel('count');
-plt.title('Boxplot of count');
-
-plt.tight_layout();
-plt.show();
+# =============================================================================
+# # ===== EDA  檢查是否偏態=====
+# #print(df[['temp','humidity','windspeed','count']].describe());
+# 
+# 
+# plt.figure(figsize=(12,5))
+# plt.rcParams['font.sans-serif'] = ['Microsoft JhengHei'];
+# plt.rcParams['axes.unicode_minus'] = False;
+# 
+# 
+# # 直方圖
+# plt.subplot(1,2,1);
+# sns.histplot(df['count'], bins=60, kde=True);  # kde=True 會畫密度線
+# plt.xlabel('count');
+# plt.ylabel('資料筆數');
+# plt.title('Histogram and KDE of count');
+# 
+# # 箱型圖 
+# plt.subplot(1,2,2);
+# sns.boxplot(y=df['count']);
+# plt.ylabel('count');
+# plt.title('Boxplot of count');
+# 
+# plt.tight_layout();
+# plt.show();
+# =============================================================================
 
 
 # 假設我們用 IQR 法找 count 的離群值
@@ -58,14 +60,18 @@ Q1 = df['count'].quantile(0.25);
 Q3 = df['count'].quantile(0.75);
 IQR = Q3 - Q1;
 
-# 判斷離群值跟假日有沒有關係
-outlier_mask = (df['count'] < (Q1 - 1.5 * IQR)) | (df['count'] > (Q3 + 1.5 * IQR));
-outliers = df[outlier_mask];
+
+
+
+# ===== t-test：假日與非假日的平均租借量（count）是否有統計上顯著差異？ =====
+holiday_cnt = df[df['holiday']==1]['count'];
+normal_cnt  = df[df['holiday']==0]['count'];
+t,p = ttest_ind(holiday_cnt, normal_cnt, equal_var=False);
+print(f"t-test 假日 vs 非假日 p值 = {p}");
+
 
 # 看離群值中 holiday 的分布
+outlier_mask = (df['count'] < (Q1 - 1.5 * IQR)) | (df['count'] > (Q3 + 1.5 * IQR));
+outliers = df[outlier_mask];
 print(outliers['holiday'].value_counts());
-
-
-
-
 
