@@ -104,18 +104,18 @@ weekday_std = df.groupby('weekday')['count'].std().reset_index()
 
 # 畫圖
 # 同時畫出 mean 和 std（誤差棒）
-weekday_stats = df.groupby('weekday')['count'].agg(['mean', 'std']).reset_index()
+weekday_stats = df.groupby('weekday')['count'].agg(['mean', 'std']).reset_index();
 
-plt.figure(figsize=(10, 5))
-sns.barplot(data=weekday_stats, x='weekday', y='mean', color='skyblue', label='Mean')
+plt.figure(figsize=(10, 5));
+sns.barplot(data=weekday_stats, x='weekday', y='mean', color='skyblue', label='Mean');
 plt.errorbar(x=weekday_stats['weekday'],
              y=weekday_stats['mean'],
              yerr=weekday_stats['std'],
-             fmt='none', capsize=5, color='red', label='± Std')
+             fmt='none', capsize=5, color='red', label='± Std');
 
-plt.title("Weekday Mean Count with Standard Deviation")
-plt.xlabel("Weekday (0=Mon, 6=Sun)")
-plt.ylabel("Count")
-plt.legend()
-plt.grid(True)
-plt.show()
+plt.title("Weekday Mean Count with Standard Deviation");
+plt.xlabel("Weekday (0=Mon, 6=Sun)");
+plt.ylabel("Count");
+plt.legend();
+plt.grid(True);
+plt.show();
