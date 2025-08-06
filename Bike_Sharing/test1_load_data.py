@@ -25,7 +25,7 @@ df['weekday'] = df['datetime'].dt.weekday;  # Monday=0 ... Sunday=6
 df = df.drop(columns = ["datetime"]);
 dd = df.head();
 
-
+print(df.describe());
 #檢查缺失值
 #print(df.isna().sum());
 
@@ -82,40 +82,34 @@ print(f"t-test 假日與非假日的平均租借量（count）是否有統計上
 # =============================================================================
 
 
+df = anova_funs.add_weekday_hour_feature(df);
+dd = df.iloc[0];
+
+anova_funs.hitmap(df);
+anova_funs.hitmap_weekday_hour(df);
 
 # ===== ANOVA：星期 影響 =====
 groups = [df[df['weekday']==i]['count'] for i in range(7)];
 F,p = f_oneway(*groups);
 print(f"ANOVA 星期幾之間 p值 = {p}");#p = 0.09219803980516852 > 0.05 但差異不大
 
+#長條圖
+#anova_funs.plot_week_chart(df);
+#箱型圖
+#anova_funs.plot_box(df, 'weekday', 'Weekday (0=Monday)', 'count', 'Count', 'Count Distribution by Weekday');
 
 #get SS df MS
-anova_funs.get_anova_data(df);
+#Between Groups:60000, Within Groups:30000 波動太大
+#anova_funs.get_anova_data(df);
 
-#長條圖
-anova_funs.plot_week_chart(df);
+#檢查hour
+#anova_funs.plot_hour(df);
+
+#檢查hour x weekday
+#anova_funs.plot_hour_group_weekday(df);
+#用anova table確認
+#anova_funs.two_way_anova(df);
 
 
-#箱型圖
-anova_funs.plot_box(df, 'weekday', 'Weekday (0=Monday)', 'count', 'Count', 'Count Distribution by Weekday');
 
 
-weekday_std = df.groupby('weekday')['count'].std().reset_index()
-
-# 畫圖
-# 同時畫出 mean 和 std（誤差棒）
-weekday_stats = df.groupby('weekday')['count'].agg(['mean', 'std']).reset_index();
-
-plt.figure(figsize=(10, 5));
-sns.barplot(data=weekday_stats, x='weekday', y='mean', color='skyblue', label='Mean');
-plt.errorbar(x=weekday_stats['weekday'],
-             y=weekday_stats['mean'],
-             yerr=weekday_stats['std'],
-             fmt='none', capsize=5, color='red', label='± Std');
-
-plt.title("Weekday Mean Count with Standard Deviation");
-plt.xlabel("Weekday (0=Mon, 6=Sun)");
-plt.ylabel("Count");
-plt.legend();
-plt.grid(True);
-plt.show();
