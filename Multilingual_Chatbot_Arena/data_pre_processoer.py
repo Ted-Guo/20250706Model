@@ -22,7 +22,10 @@ class data_pre_funs:
             return "";
         text = text.replace('\n', ' ').replace('\r', ' ').strip();
         return text;
-        
+    
+
+    def combine_features(self, target_column1, target_column2):
+        return f"Question: {target_column1} Answer: {target_column2}";
 
     def embedding_data(self, df, target_column, column_name, batch_size = 32):
         

@@ -49,13 +49,27 @@ df_b_embed      = pre_funs.embedding_data(df_train, "response_b", "emb_response_
 df_train = pre_funs.merge_embeddings(df_train, [df_prompt_embed, df_a_embed, df_b_embed]);
 
 print(f"after merge data count:{df_train.shape[0]}");
-dd = df_train.iloc[0];
-
-
 
 # cosine similarity
 df_train = pre_funs.get_cos(df_train, "emb_prompt", "emb_response_a", pre_funs.embedding_dim, "cos_prompt_a");
 df_train = pre_funs.get_cos(df_train, "emb_prompt", "emb_response_b", pre_funs.embedding_dim, "cos_prompt_b");
+
+
+# =============================================================================
+# embedding for question target
+# =============================================================================
+
+#將prompt,response_A combine + embedding
+df_train['combine_a'] = df_train.apply(lambda row: pre_funs.combine_features(row['prompt'], row['response_a']), axis=1);
+df_combine_a_embed = pre_funs.embedding_data(df_train, "combine_a", "emb_combine_a");
+
+#將prompt,response_b combine + embedding
+df_train['combine_b'] = df_train.apply(lambda row: pre_funs.combine_features(row['prompt'], row['response_b']), axis=1);
+df_combine_b_embed = pre_funs.embedding_data(df_train, "combine_b", "emb_combine_b");
+
+#合併回原始 df（靠 id 對齊）
+df_train = pre_funs.merge_embeddings(df_train, [df_combine_a_embed, df_combine_b_embed]);
+
 
 
 out_path = "pre_datas_0822.parquet";
