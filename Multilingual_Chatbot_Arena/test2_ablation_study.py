@@ -62,8 +62,14 @@ df_train = pd.read_parquet("pre_datas_0822.parquet");
 # Wilcoxon test : WilcoxonResult(statistic=np.float64(0.0), pvalue=np.float64(0.0625))
 # =============================================================================
 
+
 # =============================================================================
-#cross_score_b: 提升幅度小但顯著 
+# cross_score_b: 提升幅度小但顯著 
+# Seed 42 | AUC base mean=0.5659, AUC+test mean=0.5670, Δ=0.0012
+# Seed 52 | AUC base mean=0.5619, AUC+test mean=0.5630, Δ=0.0011
+# Seed 62 | AUC base mean=0.5684, AUC+test mean=0.5695, Δ=0.0011
+# 
+# === Overall Result ===
 # AUC base    : mean = 0.5653779251621962 ± 0.005212982133855345
 # AUC + test  : mean = 0.5664916147603901 ± 0.0052775111831613476
 # ΔAUC per fold = [0.00143147 0.00160854 0.00081192 0.00177503 0.00026883 0.00117964
@@ -76,6 +82,8 @@ df_train = pd.read_parquet("pre_datas_0822.parquet");
 
 
 
+
+
 pairs_a = list(zip(df_train["prompt"], df_train["response_a"]));
 pairs_b = list(zip(df_train["prompt"], df_train["response_b"]));
 df_train = pre_funs.cross_encoder(df_train, pairs_a, pairs_b);
@@ -85,7 +93,7 @@ df_no_q = df_train[~df_train['prompt'].str.contains(r"[?？]", na=False)];
 base_cols = [col for col in df_no_q.columns if col.startswith("emb_response_a") or col.startswith("emb_response_b") or col.startswith("emb_prompt")];
 #test_cols = [col for col in df_no_q.columns if col.startswith("cross_score_a")];
 #test_cols = [col for col in df_no_q.columns if col.startswith("cross_score_b")];
-test_cols = [col for col in df_no_q.columns if col.startswith("diff")];
+test_cols = [col for col in df_no_q.columns if col.startswith("cross_diff")];
 
 
 validator_funs.ablation_study_test(df_no_q, base_cols, test_cols);
