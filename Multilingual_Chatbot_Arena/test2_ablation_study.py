@@ -9,9 +9,10 @@ import pandas as pd;
 import numpy as np;
 
 from modelValidator_processor import ModelValidator;
-
+from data_pre_processoer import data_pre_funs;
 
 validator_funs = ModelValidator();
+pre_funs = data_pre_funs();
 
 df_train = pd.read_parquet("pre_datas_0822.parquet");
 
@@ -26,10 +27,12 @@ df_train = pd.read_parquet("pre_datas_0822.parquet");
 # Wilcoxon test : WilcoxonResult(statistic=np.float64(6.0), pvalue=np.float64(0.8125))
 # =============================================================================
 
-df_no_q = df_train[~df_train['prompt'].str.contains(r"[?？]", na=False)]
-base_cols = [col for col in df_no_q.columns if col.startswith("emb_response_a") or col.startswith("emb_response_b") or col.startswith("emb_prompt")];
-test_cols = [col for col in df_no_q.columns if col.startswith("cos_prompt_a")];
-validator_funs.ablation_study_test(df_no_q, base_cols, test_cols);
+# =============================================================================
+# df_no_q = df_train[~df_train['prompt'].str.contains(r"[?？]", na=False)];
+# base_cols = [col for col in df_no_q.columns if col.startswith("emb_response_a") or col.startswith("emb_response_b") or col.startswith("emb_prompt")];
+# test_cols = [col for col in df_no_q.columns if col.startswith("cos_prompt_a")];
+# validator_funs.ablation_study_test(df_no_q, base_cols, test_cols);
+# =============================================================================
 
 
 # =============================================================================
@@ -41,7 +44,24 @@ validator_funs.ablation_study_test(df_no_q, base_cols, test_cols);
 # Wilcoxon test : WilcoxonResult(statistic=np.float64(1.0), pvalue=np.float64(0.125))
 # =============================================================================
 
+# =============================================================================
+# base_cols = [col for col in df_no_q.columns if col.startswith("emb_response_a") or col.startswith("emb_response_b") or col.startswith("emb_prompt")];
+# test_cols = [col for col in df_no_q.columns if col.startswith("cos_prompt_b")];
+# 
+# validator_funs.ablation_study_test(df_no_q, base_cols, test_cols);
+# =============================================================================
+
+
+#cross encoder
+pairs_a = list(zip(df_train["prompt"], df_train["response_a"]));
+pairs_b = list(zip(df_train["prompt"], df_train["response_b"]));
+df_train = pre_funs.cross_encoder(df_train, pairs_a, pairs_b);
+df_no_q = df_train[~df_train['prompt'].str.contains(r"[?？]", na=False)];
+
+
+
 base_cols = [col for col in df_no_q.columns if col.startswith("emb_response_a") or col.startswith("emb_response_b") or col.startswith("emb_prompt")];
-test_cols = [col for col in df_no_q.columns if col.startswith("cos_prompt_b")];
+test_cols = [col for col in df_no_q.columns if col.startswith("cross_score_a")];
 
 validator_funs.ablation_study_test(df_no_q, base_cols, test_cols);
+

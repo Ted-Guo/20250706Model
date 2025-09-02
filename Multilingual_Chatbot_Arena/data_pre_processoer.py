@@ -9,6 +9,8 @@ import numpy as np;
 import torch;
 
 from sentence_transformers import SentenceTransformer;
+from sentence_transformers import CrossEncoder;
+
 
 class data_pre_funs:
     
@@ -82,3 +84,25 @@ class data_pre_funs:
         
         df[column_name] = cos_np;
         return df;
+    
+    def cross_encoder(self, df, pairs_a, pairs_b):
+        model = CrossEncoder("cross-encoder/ms-marco-MiniLM-L-6-v2");
+
+        # 預測每組 (prompt, response) 的分數
+        scores_a = model.predict(pairs_a);
+        scores_b = model.predict(pairs_b);
+        
+
+        df["cross_score_a"] = scores_a;
+        df["cross_score_b"] = scores_b;
+        df["cross_diff"] = df["cross_score_a"] - df["cross_score_b"];
+
+        return df;    
+    
+    
+    
+    
+    
+    
+    
+    
