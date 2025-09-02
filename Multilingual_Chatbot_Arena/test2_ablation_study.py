@@ -53,6 +53,15 @@ df_train = pd.read_parquet("pre_datas_0822.parquet");
 
 
 #cross encoder
+# =============================================================================
+# 
+# AUC base    : [0.56060792 0.56621538 0.56283247 0.57204699 0.56756913] mean = 0.5658543753905377
+# AUC + test  : [0.56156176 0.56625022 0.56300508 0.57258942 0.56815189] mean = 0.5663116736536746
+# ΔAUC (+test - base) = 0.00045729826313680724
+# Paired t-test : TtestResult(statistic=np.float64(2.811679742589963), pvalue=np.float64(0.04823442387800346), df=np.int64(4))
+# Wilcoxon test : WilcoxonResult(statistic=np.float64(0.0), pvalue=np.float64(0.0625))
+# 
+# =============================================================================
 pairs_a = list(zip(df_train["prompt"], df_train["response_a"]));
 pairs_b = list(zip(df_train["prompt"], df_train["response_b"]));
 df_train = pre_funs.cross_encoder(df_train, pairs_a, pairs_b);
