@@ -81,26 +81,67 @@ df_train = pd.read_parquet("pre_datas_0822.parquet");
 # =============================================================================
 
 
+# =============================================================================
+# cross_diff: 提升幅度小但顯著 
+# 
+# Seed 42 | AUC base mean=0.5659, AUC+test mean=0.5696, Δ=0.0038
+# Seed 52 | AUC base mean=0.5619, AUC+test mean=0.5656, Δ=0.0037
+# Seed 62 | AUC base mean=0.5684, AUC+test mean=0.5722, Δ=0.0038
+# 
+# === Overall Result ===
+# AUC base    : mean = 0.5653779251621962 ± 0.005212982133855345
+# AUC + test  : mean = 0.5691380662527289 ± 0.005114499422601635
+# ΔAUC per fold = [0.00595025 0.00364882 0.00249724 0.00471325 0.00195621 0.00233952
+#  0.00443045 0.00440432 0.0028757  0.00434856 0.00420759 0.00504473
+#  0.00283944 0.00490953 0.0022365 ]
+# ΔAUC mean = 0.0037601410905327387
+# Paired t-test : TtestResult(statistic=np.float64(11.913875786859784), pvalue=np.float64(1.0258795747214775e-08), df=np.int64(14))
+# Wilcoxon test : WilcoxonResult(statistic=np.float64(0.0), pvalue=np.float64(6.103515625e-05))
+# =============================================================================
+
+# =============================================================================
+# pairs_a = list(zip(df_train["prompt"], df_train["response_a"]));
+# pairs_b = list(zip(df_train["prompt"], df_train["response_b"]));
+# df_train = pre_funs.cross_encoder(df_train, pairs_a, pairs_b);
+# df_no_q = df_train[~df_train['prompt'].str.contains(r"[?？]", na=False)];
+# 
+# 
+# base_cols = [col for col in df_no_q.columns if col.startswith("emb_response_a") or col.startswith("emb_response_b") or col.startswith("emb_prompt")];
+# #test_cols = [col for col in df_no_q.columns if col.startswith("cross_score_a")];
+# #test_cols = [col for col in df_no_q.columns if col.startswith("cross_score_b")];
+# test_cols = [col for col in df_no_q.columns if col.startswith("cross_diff")];
+# 
+# validator_funs.ablation_study_test(df_no_q, base_cols, test_cols);
+# =============================================================================
 
 
 
-pairs_a = list(zip(df_train["prompt"], df_train["response_a"]));
-pairs_b = list(zip(df_train["prompt"], df_train["response_b"]));
-df_train = pre_funs.cross_encoder(df_train, pairs_a, pairs_b);
-df_no_q = df_train[~df_train['prompt'].str.contains(r"[?？]", na=False)];
+
+# =============================================================================
+# cos_combine_a_b: 特徵無效
+# Seed 42 | AUC base mean=0.5832, AUC+test mean=0.5833, Δ=0.0001
+# Seed 52 | AUC base mean=0.5743, AUC+test mean=0.5743, Δ=-0.0001
+# Seed 62 | AUC base mean=0.5795, AUC+test mean=0.5795, Δ=0.0000
+# 
+# === Overall Result ===
+# AUC base    : mean = 0.5790208244490267 ± 0.00818827322171204
+# AUC + test  : mean = 0.5790155625247634 ± 0.00829927091038816
+# ΔAUC per fold = [ 1.74973840e-04 -3.62581080e-04  1.53665315e-04  2.50013554e-04
+#   1.04287422e-04 -9.93934240e-05  5.83582881e-05 -2.28598738e-04
+#  -4.55825817e-05 -1.27424035e-04  2.65739363e-04  5.07613512e-05
+#  -9.63429727e-05 -2.62099845e-04  8.52946793e-05]
+# ΔAUC mean = -5.261924263370391e-06
+# Paired t-test : TtestResult(statistic=np.float64(-0.10773337795680224), pvalue=np.float64(0.9157359184326801), df=np.int64(14))
+# Wilcoxon test : WilcoxonResult(statistic=np.float64(59.0), pvalue=np.float64(0.97796630859375))
+# =============================================================================
+
+df_q = df_train[df_train['prompt'].str.contains(r"[?？]", na=False)];
 
 
-base_cols = [col for col in df_no_q.columns if col.startswith("emb_response_a") or col.startswith("emb_response_b") or col.startswith("emb_prompt")];
-#test_cols = [col for col in df_no_q.columns if col.startswith("cross_score_a")];
-#test_cols = [col for col in df_no_q.columns if col.startswith("cross_score_b")];
-test_cols = [col for col in df_no_q.columns if col.startswith("cross_diff")];
+base_cols = [col for col in df_q.columns if col.startswith("emb_response_a") or col.startswith("emb_response_b") or col.startswith("emb_prompt")];
+test_cols = [col for col in df_q.columns if col.startswith("cos_combine_a_b")];
 
-
-validator_funs.ablation_study_test(df_no_q, base_cols, test_cols);
-
-
-
-
+validator_funs.ablation_study_test(df_q, base_cols, test_cols);
 
 
 
