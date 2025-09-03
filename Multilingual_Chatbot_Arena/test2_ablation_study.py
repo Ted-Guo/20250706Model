@@ -135,13 +135,15 @@ df_train = pd.read_parquet("pre_datas_0822.parquet");
 # Wilcoxon test : WilcoxonResult(statistic=np.float64(59.0), pvalue=np.float64(0.97796630859375))
 # =============================================================================
 
-df_q = df_train[df_train['prompt'].str.contains(r"[?？]", na=False)];
-
-
-base_cols = [col for col in df_q.columns if col.startswith("emb_response_a") or col.startswith("emb_response_b") or col.startswith("emb_prompt")];
-test_cols = [col for col in df_q.columns if col.startswith("cos_combine_a_b")];
-
-validator_funs.ablation_study_test(df_q, base_cols, test_cols);
+# =============================================================================
+# df_q = df_train[df_train['prompt'].str.contains(r"[?？]", na=False)];
+# 
+# 
+# base_cols = [col for col in df_q.columns if col.startswith("emb_response_a") or col.startswith("emb_response_b") or col.startswith("emb_prompt")];
+# test_cols = [col for col in df_q.columns if col.startswith("cos_combine_a_b")];
+# 
+# validator_funs.ablation_study_test(df_q, base_cols, test_cols);
+# =============================================================================
 
 
 

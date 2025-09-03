@@ -10,7 +10,7 @@ import torch;
 
 from sentence_transformers import SentenceTransformer;
 from sentence_transformers import CrossEncoder;
-
+from keybert import KeyBERT;
 
 class data_pre_funs:
     
@@ -98,10 +98,6 @@ class data_pre_funs:
         df["cross_diff"] = df["cross_score_a"] - df["cross_score_b"];
 
         return df;    
-    
-    
-    
-    
     
     
     
