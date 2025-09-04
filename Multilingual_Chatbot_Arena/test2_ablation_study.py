@@ -14,8 +14,9 @@ from data_pre_processoer import data_pre_funs;
 validator_funs = ModelValidator();
 pre_funs = data_pre_funs();
 
-df_train = pd.read_parquet("pre_datas_0822.parquet");
-
+#df_train = pd.read_parquet("pre_datas_0822.parquet");
+df_train = pd.read_parquet("pre_datas_0903.parquet");
+df = df_train.iloc[0];
 
 
 # 取得消融測試欄位  針對非問答類型 測試---cos_prompt_a
@@ -148,11 +149,54 @@ df_train = pd.read_parquet("pre_datas_0822.parquet");
 
 
 
+# =============================================================================
+# kw_cov_diff:顯著，但提升幅度小
+# Seed 42 | AUC base mean=0.5797, AUC+test mean=0.5845, Δ=0.0048
+# Seed 52 | AUC base mean=0.5795, AUC+test mean=0.5844, Δ=0.0049
+# Seed 62 | AUC base mean=0.5825, AUC+test mean=0.5873, Δ=0.0048
+# 
+# === Overall Result ===
+# AUC base    : mean = 0.5805900164759427 ± 0.006525640324369222
+# AUC + test  : mean = 0.5854283554018409 ± 0.00643656275414445
+# ΔAUC per fold = [0.00406327 0.0047891  0.006516   0.005092   0.0037851  0.00427792
+#  0.00465424 0.00559654 0.00548788 0.00424381 0.00375046 0.00282329
+#  0.00652111 0.00610318 0.00487118]
+# ΔAUC mean = 0.004838338925898252
+# Paired t-test : TtestResult(statistic=np.float64(17.5471486267773), pvalue=np.float64(6.286121287692816e-11), df=np.int64(14))
+# Wilcoxon test : WilcoxonResult(statistic=np.float64(0.0), pvalue=np.float64(6.103515625e-05))
+# =============================================================================
+
+# =============================================================================
+# base_cols = [col for col in df_train.columns if col.startswith("emb_response_a") or col.startswith("emb_response_b") or col.startswith("emb_prompt")];
+# test_cols = [col for col in df_train.columns if col.startswith("kw_cov_diff")];
+# 
+# validator_funs.ablation_study_test(df_train, base_cols, test_cols);
+# =============================================================================
 
 
-
-
-
-
-
-
+# =============================================================================
+# 加入情感分析效益:顯著 但提升幅度也不多
+# 
+# Seed 42 | AUC base mean=0.5797, AUC+test mean=0.5818, Δ=0.0021
+# Seed 52 | AUC base mean=0.5795, AUC+test mean=0.5818, Δ=0.0022
+# Seed 62 | AUC base mean=0.5825, AUC+test mean=0.5850, Δ=0.0025
+# 
+# === Overall Result ===
+# AUC base    : mean = 0.5805900164759427 ± 0.006525640324369222
+# AUC + test  : mean = 0.5828561274841625 ± 0.006577668929545251
+# ΔAUC per fold = [0.00243892 0.00313005 0.00106365 0.00210673 0.00189813 0.00112989
+#  0.00428858 0.00341178 0.00130639 0.00088998 0.00255592 0.00295802
+#  0.00277837 0.00288613 0.00114914]
+# ΔAUC mean = 0.0022661110082198882
+# Paired t-test : TtestResult(statistic=np.float64(8.6692544756445), pvalue=np.float64(5.310431905600501e-07), df=np.int64(14))
+# Wilcoxon test : WilcoxonResult(statistic=np.float64(0.0), pvalue=np.float64(6.103515625e-05))
+# 
+# =============================================================================
+# =============================================================================
+# import re;
+# base_cols = [col for col in df_train.columns if col.startswith("emb_response_a") or col.startswith("emb_response_b") or col.startswith("emb_prompt")];
+# pattern = r'^(a|b|prompt)_(compound|neg|neu|pos)';
+# test_cols = [col for col in df_train.columns if re.match(pattern, col)];
+# validator_funs.ablation_study_test(df_train, base_cols, test_cols);
+# 
+# =============================================================================
