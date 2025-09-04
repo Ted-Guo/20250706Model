@@ -10,9 +10,12 @@ import numpy as np;
 
 from modelValidator_processor import ModelValidator;
 from data_pre_processoer import data_pre_funs;
+from qa_detect import QADetector;
 
 validator_funs = ModelValidator();
 pre_funs = data_pre_funs();
+qa_detect_funs = QADetector(use_embeddings=False);
+
 
 #df_train = pd.read_parquet("pre_datas_0822.parquet");
 df_train = pd.read_parquet("pre_datas_0903.parquet");
@@ -200,3 +203,63 @@ df = df_train.iloc[0];
 # validator_funs.ablation_study_test(df_train, base_cols, test_cols);
 # 
 # =============================================================================
+
+
+# =============================================================================
+# 測試加入判斷疑問是否能提升預測: 很小
+# Seed 42 | AUC base mean=0.5797, AUC+test mean=0.5798, Δ=0.0001
+# Seed 52 | AUC base mean=0.5795, AUC+test mean=0.5797, Δ=0.0002
+# Seed 62 | AUC base mean=0.5825, AUC+test mean=0.5826, Δ=0.0001
+# 
+# === Overall Result ===
+# AUC base    : mean = 0.5805900164759427 ± 0.006525640324369222
+# AUC + test  : mean = 0.5807093841577197 ± 0.00652581209006634
+# ΔAUC per fold = [ 6.55964598e-05  2.47680980e-04  2.46785901e-05  1.58514832e-04
+#   7.67796508e-05  2.90090647e-04  2.80756258e-04  1.23265082e-04
+#   2.38518149e-04 -1.03594976e-05  1.15081508e-06  2.96313573e-04
+#  -2.92051295e-04  7.83410219e-05  2.11239961e-04]
+# ΔAUC mean = 0.00011936768177699767
+# Paired t-test : TtestResult(statistic=np.float64(2.955411236688286), pvalue=np.float64(0.010433532732908746), df=np.int64(14))
+# Wilcoxon test : WilcoxonResult(statistic=np.float64(16.0), pvalue=np.float64(0.01025390625))
+# =============================================================================
+
+# =============================================================================
+# df_train["is_question"] = df_train["prompt"].apply(qa_detect_funs.is_question);
+# base_cols = [col for col in df_train.columns if col.startswith("emb_response_a") or col.startswith("emb_response_b") or col.startswith("emb_prompt")];
+# test_cols = [col for col in df_train.columns if col.startswith("is_question")];
+# 
+# validator_funs.ablation_study_test(df_train, base_cols, test_cols);
+# =============================================================================
+
+
+
+# =============================================================================
+# 組合特徵
+# Seed 42 | AUC base mean=0.5797, AUC+test mean=0.5846, Δ=0.0050
+# Seed 52 | AUC base mean=0.5795, AUC+test mean=0.5845, Δ=0.0050
+# Seed 62 | AUC base mean=0.5825, AUC+test mean=0.5873, Δ=0.0048
+# 
+# === Overall Result ===
+# AUC base    : mean = 0.5805900164759427 ± 0.006525640324369222
+# AUC + test  : mean = 0.5855036039689913 ± 0.006472809271591587
+# ΔAUC per fold = [0.00410419 0.00491249 0.00665563 0.00521637 0.00389948 0.004629
+#  0.00469925 0.00556492 0.0056478  0.00441161 0.00387492 0.00299783
+#  0.00603509 0.00610203 0.0049532 ]
+# ΔAUC mean = 0.004913587493048821
+# Paired t-test : TtestResult(statistic=np.float64(19.327385937352744), pvalue=np.float64(1.708927576168229e-11), df=np.int64(14))
+# Wilcoxon test : WilcoxonResult(statistic=np.float64(0.0), pvalue=np.float64(6.103515625e-05))
+# =============================================================================
+
+# =============================================================================
+# df_train["is_question"] = df_train["prompt"].apply(qa_detect_funs.is_question);
+# base_cols = [col for col in df_train.columns if col.startswith("emb_response_a") or col.startswith("emb_response_b") or col.startswith("emb_prompt")];
+# test_cols = [col for col in df_train.columns if col.startswith("is_question") or col.startswith("kw_cov_diff") or col.startswith("cross_diff")];
+# 
+# validator_funs.ablation_study_test(df_train, base_cols, test_cols);
+# 
+# =============================================================================
+
+
+
+
+
