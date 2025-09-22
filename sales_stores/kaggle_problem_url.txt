@@ -1,0 +1,5 @@
+題目來源:
+https://www.kaggle.com/competitions/store-sales-time-series-forecasting/overview
+
+完整csv url:
+https://www.kaggle.com/competitions/store-sales-time-series-forecasting/data
