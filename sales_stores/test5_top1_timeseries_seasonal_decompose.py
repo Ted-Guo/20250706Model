@@ -134,7 +134,7 @@ result = seasonal_decompose(df_top1_monthly['sales'],
 fig = result.plot();
 fig.set_size_inches(12, 8);
 plt.tight_layout();
-plt.savefig("output/top1_Store_Sales_onprom_sales_seasonal_decompose.png", dpi=300, bbox_inches="tight");
+plt.savefig("output/top1_Store_Sales__no_onprom_sales_seasonal_decompose.png", dpi=300, bbox_inches="tight");
 plt.show();
 plt.close();
 
@@ -147,17 +147,49 @@ plt.close();
 
 
 # =============================================================================
-# 假設檢定驗證
+# 假設檢定驗證 T-test
 # =============================================================================
+from scipy.stats import ttest_ind;
+sales_promo = df_top1[df_top1['Promo_flag'] == 1]['sales'];
+sales_no_promo = df_top1[df_top1['Promo_flag'] == 0]['sales'];
+
+
+# 基本描述統計
+print("促銷期間平均銷售:", sales_promo.mean());
+print("非促銷期間平均銷售:", sales_no_promo.mean());
+
+t_stat, p_val = ttest_ind(sales_promo, sales_no_promo, equal_var=False)  # Welch's T-test
+
+print("T統計量:", t_stat)
+print("P值:", p_val)
+
+if p_val < 0.05:
+    print("差異統計顯著 → 促銷期間銷售顯著高於非促銷")
+else:
+    print("差異不顯著 → 促銷期間銷售沒有明顯提升")
 
 
 
-
-
-
-
-
-
+# =============================================================================
+# 促銷期間平均銷售: 2776.709240789766
+# 非促銷期間平均銷售: 547.2407977214001
+# T統計量: 63.99046767428273
+# P值: 0.0
+# 差異統計顯著 → 促銷期間銷售顯著高於非促銷
+# 
+# 結論:
+# 1.促銷效果明顯
+# 	a.促銷期間銷售額遠高於非促銷期間（平均約 5 倍），T 檢定顯示統計顯著。
+# 	b.說明促銷策略能顯著拉抬銷售。
+# 
+# 2.季節性趨勢
+# 	a.每年 12 月促銷銷售額最高 → 年末節慶（聖誕、跨年）為高峰期。
+# 	b.其他月份促銷效果雖高於非促銷，但沒有固定高峰 → 可視為促銷帶來的「即時刺激」。
+# 
+# 3.長期趨勢
+# 	a.非促銷期間銷售趨勢略下降 → 自然銷售力不足，需要促銷或其他策略維持收入。
+# 	b.促銷期間銷售呈上升或穩定 → 表示促銷能抵消自然下降趨勢。
+# =============================================================================
 
 
 
