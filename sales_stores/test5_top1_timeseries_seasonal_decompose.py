@@ -4,7 +4,7 @@ import seaborn as sns;
 import os;
 
 from statsmodels.tsa.seasonal import seasonal_decompose;
-
+from matplotlib.dates import DateFormatter;
 
 # 1. 讀取資料
 df_train = pd.read_csv("train.csv", parse_dates=['date']);
@@ -29,21 +29,111 @@ df_top1_promo = df_top1[df_top1['Promo_flag'] == 1];
 
 
 
-# 先按年月排序
-df_top1_monthly = df_top1.groupby(['year', 'month'], as_index=False)['sales'].sum();
 
-# 建立時間索引
-df_top1_monthly['date'] = pd.to_datetime(df_top1_monthly['year'].astype(str) + '-' + df_top1_monthly['month'].astype(str) + '-01');
+# =============================================================================
+# 觀察整體營收情況
+# =============================================================================
+# 先按年月彙總
+df_top1_monthly = (
+    df_top1.groupby(['year','month'], as_index=False)['sales']
+    .sum()
+    .sort_values(['year','month'])
+)
+
+# 建立時間索引 (每月第一天)
+df_top1_monthly['date'] = pd.to_datetime(
+    df_top1_monthly['year'].astype(str) + '-' +
+    df_top1_monthly['month'].astype(str) + '-01'
+)
 df_top1_monthly = df_top1_monthly.set_index('date');
 
-# 使用 sales 欄位進行分解
-result = seasonal_decompose(df_top1_monthly['sales'], model='additive', period=12);
-result.plot();
-plt.savefig("output/top1_Store_Sales_seasonal_decompose.png", dpi=300, bbox_inches="tight");
+# 時間序列分解
+result = seasonal_decompose(df_top1_monthly['sales'],
+                            model='additive', period=12);
+
+# 畫圖
+fig = result.plot();
+fig.set_size_inches(12, 8);
+plt.tight_layout();
+plt.savefig("output/top1_Store_Sales_all_sales_seasonal_decompose.png", dpi=300, bbox_inches="tight");
 plt.show();
 plt.close();
+
+# =============================================================================
+# 這家店的整體營收逐年成長（Trend 上升）。
+# 每年有明顯的銷售季節性（Seasonal），可以針對高峰月份規劃促銷活動。
+# 部分波動無法預測（Residual），屬於隨機或特殊事件造成。
+# =============================================================================
+
+
+
+
+
+# =============================================================================
+# 觀察促銷營收情況
+# =============================================================================
+# 先按年月彙總
+df_top1_monthly = (
+    df_top1_promo.groupby(['year','month'], as_index=False)['sales']
+    .sum()
+    .sort_values(['year','month'])
+)
+
+# 建立時間索引 (每月第一天)
+df_top1_monthly['date'] = pd.to_datetime(
+    df_top1_monthly['year'].astype(str) + '-' +
+    df_top1_monthly['month'].astype(str) + '-01'
+)
+df_top1_monthly = df_top1_monthly.set_index('date');
+
+# 時間序列分解
+result = seasonal_decompose(df_top1_monthly['sales'],
+                            model='additive', period=12);
+
+# 畫圖
+fig = result.plot();
+fig.set_size_inches(12, 8);
+plt.tight_layout();
+plt.savefig("output/top1_Store_Sales_onprom_sales_seasonal_decompose.png", dpi=300, bbox_inches="tight");
+plt.show();
+plt.close();
+
+
 # =============================================================================
 # 促銷策略可能對整體趨勢有正面影響（Trend 上升）。
 # 每年有明顯的銷售季節性（Seasonal），可以針對高峰月份規劃促銷活動。
 # 部分波動無法預測（Residual），屬於隨機或特殊事件造成。
 # =============================================================================
+
+
+# =============================================================================
+# 假設檢定驗證
+# =============================================================================
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
