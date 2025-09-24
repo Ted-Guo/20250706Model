@@ -106,6 +106,46 @@ plt.close();
 # =============================================================================
 
 
+
+
+# =============================================================================
+# 觀察非促銷營收情況
+# =============================================================================
+# 先按年月彙總
+df_top1_no_promo = df_top1[df_top1['Promo_flag'] == 0];
+df_top1_monthly = (
+    df_top1_no_promo.groupby(['year','month'], as_index=False)['sales']
+    .sum()
+    .sort_values(['year','month'])
+)
+
+# 建立時間索引 (每月第一天)
+df_top1_monthly['date'] = pd.to_datetime(
+    df_top1_monthly['year'].astype(str) + '-' +
+    df_top1_monthly['month'].astype(str) + '-01'
+)
+df_top1_monthly = df_top1_monthly.set_index('date');
+
+# 時間序列分解
+result = seasonal_decompose(df_top1_monthly['sales'],
+                            model='additive', period=12);
+
+# 畫圖
+fig = result.plot();
+fig.set_size_inches(12, 8);
+plt.tight_layout();
+plt.savefig("output/top1_Store_Sales_onprom_sales_seasonal_decompose.png", dpi=300, bbox_inches="tight");
+plt.show();
+plt.close();
+
+# =============================================================================
+# 市場習慣轉移：消費者越來越依賴促銷才購買，原價銷售的吸引力降低。
+# 季節性（Seasonal依然存在，即使不促銷，消費者在某些月份仍有固定的購買習慣。
+#     ->代表店家過度依賴促銷才能維持營收。長期來看，這會侵蝕品牌價值（客人只在打折時買）
+# 部分波動無法預測（Residual），屬於隨機或特殊事件造成。
+# =============================================================================
+
+
 # =============================================================================
 # 假設檢定驗證
 # =============================================================================
